@@ -175,7 +175,7 @@ Repository.prototype._create = async function (data, transactionObj) {
 	}
 }
 
-Repository.prototype.createDev = async function (datas, transactionObj) {
+Repository.prototype.createArray = async function (datas, transactionObj) {
 	try {
 		if (datas == null || !datas.length)
 			return []
@@ -217,12 +217,7 @@ Repository.prototype.create = async function (data, transactionObj) {
 	//Add transaction and rollback on error
 	try {
 		if (_.isArray(data)) {
-			var res = []
-			for (var i = 0; i != data.length; ++i) {
-				//this is bad, use multi row insert: (setFieldsRows)
-				res.push(this._create(data[i], transactionObj))
-			}
-			return Promise.all(res)
+			return this.createArray(data, transactionObj)
 		} else {
 			return this._create(data, transactionObj)
 		}
