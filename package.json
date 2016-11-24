@@ -1,0 +1,25 @@
+{
+  "name": "bedrock-orm",
+  "version": "0.0.1",
+  "description": "Bedrock \"orm\" for postgresql, inspired by waterline",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarcDeletang/bedrock-orm.git"
+  },
+  "author": "Marc Deletang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarcDeletang/bedrock-orm/issues"
+  },
+  "homepage": "https://github.com/MarcDeletang/bedrock-orm#readme",
+  "dependencies": {
+    "lodash": "^4.17.2",
+    "pg": "^6.1.0",
+    "pg-escape": "^0.2.0",
+    "squel": "^5.5.0"
+  }
+}
