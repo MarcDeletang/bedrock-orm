@@ -15,7 +15,7 @@ module.exports = {
 		if (_.has(repository.model, key) && _.isObject(repository.model[key]) && (_.has(repository.model[key], 'model') || _.has(repository.model[key], 'collection'))){
 			var child = repository.model[key]
 			var modelType = child.model == null ? child.collection : child.model
-			var targetRepository = global[_.upperFirstLetter(modelType)]
+			var targetRepository = global[_.upperFirst(modelType)]
 			var primary = null
 			var foreign = null
 			var relationType = null

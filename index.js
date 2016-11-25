@@ -1,6 +1,8 @@
 var dbLayer = require('./dbLayer.js')
 var repository = require('./repository.js')
-var modelLoader = require('./modelLoader.js');
+var modelLoader = require('./modelLoader.js')
+require('./lodashExtend.js').init()
+
 var _ = require('lodash')
 
 function Orm(config, models, bedrock) {
