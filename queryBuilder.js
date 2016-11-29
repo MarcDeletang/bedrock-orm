@@ -10,6 +10,8 @@ squel.registerValueHandler(Date, function (date) {
 })
 
 squel.registerValueHandler('string', function (str) {
+	if (str.length == 0)
+		return "''"
 	return escape.dollarQuotedString(str)
 })
 
