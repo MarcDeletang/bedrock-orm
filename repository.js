@@ -231,7 +231,7 @@ Repository.prototype._find = async function (criteria) {
 	try {
 		var query = queryBuilder.select(this.tableName)
 		query = queryBuilder.addWhere(this, argsParser.getCriteria(this, criteria), query)
-		query = query.limit(10)
+		query = query.limit(200)
 		var queryString = query.toString()
 
 		//console.log('Query _find', queryString)

@@ -14,7 +14,11 @@ function Orm(config, models, bedrock) {
 Orm.prototype.init = function () {
 	dbLayer.init(this.config)
 	var repositories = modelLoader.load(this.models, this.bedrock)
-	this.setupDatabase(repositories, this.bedrock)
+	if (this.config.setTrigger == true) {
+		this.setupDatabase(repositories, this.bedrock)
+	} else {
+		this.bedrock.log('Trigger not set')
+	}
 }
 
 Orm.prototype.setupDatabase = async function (repositories, bedrock) {
