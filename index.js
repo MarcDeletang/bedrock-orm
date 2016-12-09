@@ -17,7 +17,7 @@ Orm.prototype.init = function () {
 	if (this.config.setTrigger == true) {
 		this.setupDatabase(repositories, this.bedrock)
 	} else {
-		this.bedrock.log('Trigger not set')
+		console.log('Trigger not set')
 	}
 }
 

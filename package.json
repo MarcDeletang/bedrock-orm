@@ -1,6 +1,6 @@
 {
   "name": "bedrock-orm",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Bedrock \"orm\" for postgresql, inspired by waterline",
   "main": "index.js",
   "scripts": {
