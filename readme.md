@@ -1,5 +1,5 @@
 # Bedrock orm
-### This is an orm for bedrok-js working with postgresql:
+### This is an "orm" light for bedrok-js working with postgresql:
 
 Usage in bedrock-js
 
@@ -14,9 +14,6 @@ Supported associations:
 - oneToMany
 
 Transactions are also supported with the startTransaction method
-
-#### Note:
-You will need the babel-register module for now to use it (see bedrock-js/esHook)
 
 #### Todo:
 - Generate db schema
