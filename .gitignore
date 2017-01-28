@@ -1,4 +1,4 @@
 node_modules/
 *.sh
 *.dump
-tests/config.js
+test/config.js
