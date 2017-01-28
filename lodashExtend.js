@@ -15,26 +15,25 @@ module.exports = {
 
 		//http://caolan.github.io/async/docs.html#.applyEachSeries
 		_.mixin({
-			'applyEachSeries': function (callbacks, data) {
+			'applyEachSeries': (callbacks, data) => {
 				var that = {}
 				that.callbacks = callbacks
 				that.data = data
-				return new Promise(
-					function (resolve, reject) {
-						that.resolve = resolve
-						that.finalResults = []
-						var next = function (finalResult) {
-							if (that.callbacks.length == 0)
-								resolve(that.finalResults)
-							if (finalResult != null)
-								that.finalResults.push(finalResult)
-							var method = that.callbacks.shift()
-							if (method)
-								method(that.data, that.next)
-						}
-						that.next = next
-						next()
-					})
+				return new Promise((resolve, reject) => {
+					that.resolve = resolve
+					that.finalResults = []
+					var next = (finalResult) => {
+						if (that.callbacks.length == 0)
+							resolve(that.finalResults)
+						if (finalResult != null)
+							that.finalResults.push(finalResult)
+						var method = that.callbacks.shift()
+						if (method)
+							method(that.data, that.next)
+					}
+					that.next = next
+					next()
+				})
 			}
 		})
 

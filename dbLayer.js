@@ -4,19 +4,16 @@ var pg = require('pg')
 
 module.exports = {
 	init(config) {
-		try {
+		return new Promise(((resolve, reject) => {
 			this.pool = new pg.Pool(config)
-
 			this.pool.on('PgError', function (err, client) {
-				Bedrock.log.error('pgError fatal db', err.message, err.stack)
+				console.log('pgError fatal db', err.message, err.stack)
 			})
 			this.pool.on('error', function (err, client) {
-				Bedrock.log.error('error fatal db', err.message, err.stack)
+				console.log('error fatal db', err.message, err.stack)
 			})
-
-		} catch (e) {
-			Bedrock.log.error('ex dbLayer.init', e.stack)
-		}
+			return resolve(true)
+		}).bind(this))
 	},
 
 	query(query) {
@@ -24,9 +21,8 @@ module.exports = {
 	},
 
 	getClient() {
-		var that = this
-		return new Promise(function (resolve, reject) {
-			that.pool.connect(function (err, client, release) {
+		return new Promise(((resolve, reject) => {
+			this.pool.connect(function (err, client, release) {
 				if (err)
 					return reject(err)
 				else {
@@ -34,6 +30,6 @@ module.exports = {
 					return resolve(client)
 				}
 			})
-		})
+		}).bind(this))
 	}
 }

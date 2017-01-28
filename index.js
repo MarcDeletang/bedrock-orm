@@ -4,73 +4,77 @@ var modelLoader = require('./modelLoader.js')
 require('./lodashExtend.js').init()
 
 var _ = require('lodash')
+var Promise = require('bluebird')
 
-function Orm(config, models, bedrock) {
+function Orm(config, models, log) {
 	this.config = config
 	this.models = models
-	this.bedrock = bedrock
+	this.log = log
 }
 
 Orm.prototype.init = function () {
-	dbLayer.init(this.config)
-	var repositories = modelLoader.load(this.models, this.bedrock)
-	if (this.config.setTrigger == true) {
-		this.setupDatabase(repositories, this.bedrock)
-	} else {
-		console.log('Trigger not set')
-	}
+	return dbLayer.init(this.config).then((res => {
+		var repositories = modelLoader.load(this.models, this.log)
+		if (this.config.setTrigger == true) {
+			return this.setupDatabase(repositories, this.log).then(result => {
+				return repositories
+			})
+		} else {
+			console.log('Trigger not set')
+			return repositories
+		}
+	}).bind(this))
 }
 
-Orm.prototype.setupDatabase = async function (repositories, bedrock) {
-	var queryFunctionAutoCreated = 'CREATE OR REPLACE FUNCTION update_created_column()\
-	RETURNS TRIGGER AS $$\
-	BEGIN\
-	NEW."createdAt" = now();\
-	RETURN NEW;\
-	END;\
-	$$ language \'plpgsql\';'
-	var queryFunctionAutoUpdated = 'CREATE OR REPLACE FUNCTION update_modified_column()\
-	RETURNS TRIGGER AS $$\
-	BEGIN\
-	NEW."updatedAt" = now();\
-	RETURN NEW;\
-	END;\
-	$$ language \'plpgsql\';'
-	var rawQueryDropOldCreatedAt = 'DROP TRIGGER trigger_create_{modelName} ON {tableName};'
-	var rawQueryDropOldUpdatedAt = 'DROP TRIGGER trigger_update_{modelName} ON {tableName};'
-	var rawQueryAutoCreatedAt = 'CREATE TRIGGER {triggerName} BEFORE INSERT ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_created_column();'
-	var rawQueryAutoUpdatedAt = 'CREATE TRIGGER {triggerName} BEFORE UPDATE ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_modified_column();'
+Orm.prototype.setupDatabase = function (repositories, log) {
+	var queryFunctionAutoCreated = `CREATE OR REPLACE FUNCTION update_created_column()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	NEW."createdAt" = now();
+	RETURN NEW;
+	END;
+	$$ language 'plpgsql';`
+	var queryFunctionAutoUpdated = `CREATE OR REPLACE FUNCTION update_modified_column()
+	RETURNS TRIGGER AS $$
+	BEGIN
+	NEW."updatedAt" = now();
+	RETURN NEW;
+	END;
+	$$ language 'plpgsql';`
 
-	try {
-		await this.query(queryFunctionAutoCreated)
-		await this.query(queryFunctionAutoUpdated)
-	} catch (e) {
-		bedrock.log.error('Orm.setupDatabase', e)
-	}
+	var startCreate = (result => {
+		console.log('finished drop')
+		console.log('started create')
+		var promisesCreate = repositories.reduce((result, repository) => {
+			var rawQueryAutoCreatedAt = 'CREATE TRIGGER {triggerName} BEFORE INSERT ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_created_column();'
+			var rawQueryAutoUpdatedAt = 'CREATE TRIGGER {triggerName} BEFORE UPDATE ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_modified_column();'
+			if (repository.autoCreatedAt)
+				result.push(this.query(rawQueryAutoCreatedAt.replace('{triggerName}', 'trigger_create_' + _.toLower(repository.modelName)).replace('{tableName}', repository.tableName)))
+			if (repository.updatedAt)
+				result.push(this.query(rawQueryAutoUpdatedAt.replace('{triggerName}', 'trigger_create_' + _.toLower(repository.modelName)).replace('{tableName}', repository.tableName)))
+			return result
+		}, [])
+		return Promise.all(promisesCreate)
+	}).bind(this)
 
-	for (var i = 0; i != repositories.length; ++i) {
-		var queryDropOldCreatedAt = rawQueryDropOldCreatedAt.replace('{modelName}', _.toLower(repositories[i].modelName)).replace('{tableName}', repositories[i].tableName)
-		var queryDropOldUpdatedAt = rawQueryDropOldUpdatedAt.replace('{modelName}', _.toLower(repositories[i].modelName)).replace('{tableName}', repositories[i].tableName)
-		var queryAutoCreatedAt = rawQueryAutoCreatedAt.replace('{triggerName}', 'trigger_create_' + _.toLower(repositories[i].modelName)).replace('{tableName}', repositories[i].tableName)
-		var queryAutoUpdatedAt = rawQueryAutoUpdatedAt.replace('{triggerName}', 'trigger_update_' + _.toLower(repositories[i].modelName)).replace('{tableName}', repositories[i].tableName)
-		try {
-			if (repositories[i].autoCreatedAt)
-				await this.query(queryDropOldCreatedAt)
-		} catch (e) {}
-		try {
-			if (repositories[i].autoUpdatedAt)
-				await this.query(queryDropOldUpdatedAt)
-		} catch (e) {}
-		try {
-			if (repositories[i].autoCreatedAt)
-				await this.query(queryAutoCreatedAt)
-		} catch (e) {}
-		try {
-			if (repositories[i].autoUpdatedAt)
-				await this.query(queryAutoUpdatedAt)
-		} catch (e) {}
-	}
-	this.bedrock.log.info('Orm loaded')
+	var startDrop = (result => {
+		console.log('started drop')
+		var promisesDrop = repositories.reduce((result, repository) => {
+			var rawQueryDropOldCreatedAt = 'DROP TRIGGER trigger_create_{modelName} ON {tableName};'
+			var rawQueryDropOldUpdatedAt = 'DROP TRIGGER trigger_update_{modelName} ON {tableName};'
+			if (repository.autoCreatedAt)
+				result.push(this.query(rawQueryDropOldCreatedAt.replace('{modelName}', _.toLower(repository.modelName)).replace('{tableName}', repository.tableName)))
+			if (repository.updatedAt)
+				result.push(this.query(rawQueryDropOldUpdatedAt.replace('{triggerName}', 'trigger_create_' + _.toLower(repository.modelName)).replace('{tableName}', repository.tableName)))
+			return result
+		}, [])
+		return Promise.all(promisesDrop)
+	}).bind(this)
+
+	return Promise.all([this.query(queryFunctionAutoCreated), this.query(queryFunctionAutoUpdated)]).then(startDrop).catch(err => {
+		//We don't care here
+		return Promise.resolve('continue')
+	}).then(startCreate)
 }
 
 Orm.prototype.query = function (query) {
