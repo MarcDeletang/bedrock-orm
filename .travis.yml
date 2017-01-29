@@ -11,5 +11,5 @@ node_js:
 
 
 before_script:
-    - psql -c 'test;' -U postgres
+    - createdb 'test' -U postgres
     - psql test < db.dump  -U postgres
