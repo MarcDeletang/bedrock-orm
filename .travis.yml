@@ -12,4 +12,4 @@ node_js:
 
 before_script:
     - psql -c 'create database test;' -U postgres
-    - psql -d test -f db.dump
+    - psql -d test -f bedrock-orm/db.dump
