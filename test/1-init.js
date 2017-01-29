@@ -6,6 +6,9 @@ const repositories = require('./models/Repositories.js')
 const Orm = require('../index.js')
 const _ = require('lodash')
 
+// const configFilePath = process.argv
+// console.log('PATH', configFilePath)
+
 describe('Init', function () {
 	describe('Constructor', function () {
 		it('Orm should be a constructor', function (done) {
