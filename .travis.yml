@@ -9,6 +9,6 @@ env:
 node_js:
     - "6"
 
-
 before_script:
     - psql -c 'create database test;' -U postgres
+    - psql -d test -f travis.dump -U postgres

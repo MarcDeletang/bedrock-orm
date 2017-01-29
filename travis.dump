@@ -1,0 +1,282 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.5
+-- Dumped by pg_dump version 9.5.5
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- Name: update_created_column(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION update_created_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$	BEGIN	NEW."createdAt" = now();	RETURN NEW;	END;	$$;
+
+
+ALTER FUNCTION public.update_created_column() OWNER TO postgres;
+
+--
+-- Name: update_modified_column(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION update_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$	BEGIN	NEW."updatedAt" = now();	RETURN NEW;	END;	$$;
+
+
+ALTER FUNCTION public.update_modified_column() OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: cart; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE cart (
+    "totalPrice" integer,
+    coupon text,
+    "isPaid" boolean,
+    id integer NOT NULL,
+    "createdAt" timestamp with time zone,
+    "updatedAt" timestamp with time zone,
+    user_id integer
+);
+
+
+ALTER TABLE cart OWNER TO postgres;
+
+--
+-- Name: cart_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE cart_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE cart_id_seq OWNER TO postgres;
+
+--
+-- Name: cart_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE cart_id_seq OWNED BY cart.id;
+
+
+--
+-- Name: cartproduct; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE cartproduct (
+    "dateAdded" timestamp with time zone,
+    "numberOf" integer,
+    id integer NOT NULL,
+    "createdAt" timestamp with time zone,
+    "updatedAt" timestamp with time zone,
+    cart_id integer
+);
+
+
+ALTER TABLE cartproduct OWNER TO postgres;
+
+--
+-- Name: cartproduct_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE cartproduct_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE cartproduct_id_seq OWNER TO postgres;
+
+--
+-- Name: cartproduct_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE cartproduct_id_seq OWNED BY cartproduct.id;
+
+
+--
+-- Name: product; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE product (
+    name text,
+    price integer,
+    description text,
+    id integer NOT NULL,
+    "createdAt" timestamp with time zone,
+    "updatedAt" timestamp with time zone
+);
+
+
+ALTER TABLE product OWNER TO postgres;
+
+--
+-- Name: product_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE product_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE product_id_seq OWNER TO postgres;
+
+--
+-- Name: product_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE product_id_seq OWNED BY product.id;
+
+
+--
+-- Name: user; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE "user" (
+    email text,
+    password text,
+    salt text,
+    "firstName" text,
+    "lastName" text,
+    id integer NOT NULL,
+    "createdAt" timestamp with time zone,
+    "updatedAt" timestamp with time zone
+);
+
+
+ALTER TABLE "user" OWNER TO postgres;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE user_id_seq OWNER TO postgres;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE user_id_seq OWNED BY "user".id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY cart ALTER COLUMN id SET DEFAULT nextval('cart_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY cartproduct ALTER COLUMN id SET DEFAULT nextval('cartproduct_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY product ALTER COLUMN id SET DEFAULT nextval('product_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
+
+
+--
+-- Name: cart_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY cart
+    ADD CONSTRAINT cart_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: cartproduct_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY cartproduct
+    ADD CONSTRAINT cartproduct_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: product_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY product
+    ADD CONSTRAINT product_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY "user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
