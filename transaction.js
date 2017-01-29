@@ -4,12 +4,12 @@ function TransactionObject() {
     this.client = null
 }
 
-TransactionObject.prototype.start = function (query) {
+TransactionObject.prototype.start = function () {
     function p(resolve, reject) {
         function onClient(client) {
             this.client = client
             this.client.query('BEGIN;').then(result => {
-                resolve(client)
+                resolve(this)
             }).catch(error => {
                 reject(error)
             })
@@ -23,7 +23,7 @@ TransactionObject.prototype.start = function (query) {
     return new Promise(p.bind(this))
 }
 
-TransactionObject.prototype.commit = function (query) {
+TransactionObject.prototype.commit = function () {
     return new Promise(((resolve, reject) => {
         if (this.client == null)
             reject('Cannot commit before start transaction')
@@ -45,7 +45,7 @@ TransactionObject.prototype.commit = function (query) {
 
 //Does not use ROLLBACK because node pg does it for us
 //https://github.com/brianc/node-postgres/wiki/pg
-TransactionObject.prototype.rollback = function (query) {
+TransactionObject.prototype.rollback = function () {
     return new Promise((resolve, reject => {
         if (this.client == null)
             reject('Cannot rollback before start transaction')

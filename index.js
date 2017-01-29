@@ -153,4 +153,5 @@ Orm.prototype.query = function (query) {
 	return dbLayer.query(query)
 }
 
-module.exports = Orm
+module.exports.Orm = Orm
+module.exports.Repository = repository
