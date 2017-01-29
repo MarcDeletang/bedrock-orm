@@ -1,7 +1,8 @@
 const expect = require('chai').expect
 
 const configPath = process.env.CONFIGPATH
-const opt = configPath == null ? require('./config.travis.js') : require('./' + configPath)
+console.log('ENV VAR', configPath)
+const opt = configPath == null ? require('./config.js') : require('./' + configPath)
 
 
 const repositories = require('./models/Repositories.js')
