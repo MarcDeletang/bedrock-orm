@@ -1,10 +1,10 @@
-const expect = require('chai').expect
+const chai = require('chai')
+const chaiAsPromised = require("chai-as-promised")
+chai.use(chaiAsPromised)
+const expect = chai.expect
 
 const configPath = process.env.CONFIGPATH
-console.log('ENV VAR', configPath)
 const opt = configPath == null ? require('./config.js') : require('./' + configPath)
-
-
 const repositories = require('./models/Repositories.js')
 
 const Orm = require('../index.js')
@@ -26,7 +26,7 @@ describe('Init', function () {
 
 
 		it('Orm shoud throw an error on database', function (done) {
-			var optCloned = _.clone(opt)
+			let optCloned = _.clone(opt)
 			delete optCloned.database
 			expect(() => {
 				new Orm(optCloned)
@@ -35,7 +35,7 @@ describe('Init', function () {
 		})
 
 		it('Orm shoud throw an error on password', function (done) {
-			var optCloned = _.clone(opt)
+			let optCloned = _.clone(opt)
 			delete optCloned.password
 			expect(() => {
 				new Orm(optCloned)
@@ -44,7 +44,7 @@ describe('Init', function () {
 		})
 
 		it('Orm shoud throw an error on user', function (done) {
-			var optCloned = _.clone(opt)
+			let optCloned = _.clone(opt)
 			delete optCloned.user
 			expect(() => {
 				new Orm(optCloned)
@@ -53,7 +53,7 @@ describe('Init', function () {
 		})
 
 		it('Orm loaded should be an object without errors', function (done) {
-			var orm = new Orm(opt, repositories)
+			let orm = new Orm(opt, repositories)
 			expect(orm).to.be.an('object')
 			done()
 		})
@@ -61,20 +61,20 @@ describe('Init', function () {
 
 	describe('Testing globals', function () {
 		it('Should have not set any globals', function (done) {
-			var orm = new Orm(opt, repositories)
+			let orm = new Orm(opt, repositories)
 			orm.loadRepositories()
-			for (var key in repositories) {
+			for (let key in repositories) {
 				expect(global[key]).to.be.undefined
 			}
 			done()
 		})
 
 		it('Should have set globals', function (done) {
-			var optCloned = _.clone(opt)
+			let optCloned = _.clone(opt)
 			optCloned.setGlobal = true
-			var orm = new Orm(optCloned, repositories)
+			let orm = new Orm(optCloned, repositories)
 			orm.loadRepositories()
-			for (var key in repositories) {
+			for (let key in repositories) {
 				expect(global[key]).to.be.an('object')
 			}
 			done()
@@ -82,47 +82,57 @@ describe('Init', function () {
 	})
 
 	describe('Loading repositories', function () {
+
 		it('Repositories should load without errors', function (done) {
-			var orm = new Orm(opt, repositories)
-			expect(() => {
-				orm.loadRepositories()
-			}).not.to.throw(Error)
+			let orm = new Orm(opt, repositories)
+			let loadRes = orm.loadRepositories()
+			expect(loadRes).to.be.an('array')
 			done()
+			console.log(loadRes[0])
 		})
+
 	})
 
 
 
 
-	describe('Setup database', function () {
+	describe('Testing init database', function () {
 		it('Orm init should failed: repositories empty', function (done) {
-			var orm = new Orm(opt, repositories)
-			expect(() => {
-				orm.init()
-			}).to.throw('InitError: cannot init before loadRepositories')
-			done()
-		})
-
-		it('Orm init should work without errors', function (done) {
-			var orm = new Orm(opt, repositories)
+			let orm = new Orm(opt, repositories)
 			orm.loadRepositories()
-			expect(() => {
-				orm.init()
-
-				User.create({
-					email: 'test@test.fr',
-					password: 'password',
-					firstName: 'firstName',
-					lastName: 'lastName'
-				}).then(user => {
-					console.log('user', user)
-				}, err => {
-					console.log('err', err)
-				})
-
-			}).not.to.throw(Error)
-			done()
+			expect(orm.init()).to.be.fulfilled.notify(done)
 		})
+
+		it('Orm init should failed: invalid password', function (done) {
+			let optCloned = _.clone(opt)
+			optCloned.password = "fail"
+			let orm = new Orm(optCloned, repositories)
+			orm.loadRepositories()
+			 expect(orm.init()).to.be.rejectedWith(Error).notify(done)
+		})
+
+		// it('Orm init should work without errors', function (done) {
+		// 	let orm = new Orm(opt, repositories)
+		// 	orm.loadRepositories()
+		// 	expect(() => {
+		// 		orm.init().then(() => {
+		// 			User.create({
+		// 				email: 'test@test.fr',
+		// 				password: 'password',
+		// 				firstName: 'firstName',
+		// 				lastName: 'lastName'
+		// 			}).then(user => {
+		// 				console.log('user', user)
+		// 			}, err => {
+		// 				console.log('err', err)
+		// 			})
+
+		// 		}).catch(err => {
+		// 			console.log('Main catched', err)
+		// 		})
+		// 	}).not.to.throw(Error)
+		// 	done()
+		// })
 
 
 	})

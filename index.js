@@ -79,21 +79,22 @@ function Orm(config, models, log) {
 
 Orm.prototype.loadRepositories = function () {
 	this.repositories = repositoryLoader.load(this.models, this.config.setGlobal, this.log)
+	return this.repositories
 }
 
 Orm.prototype.init = function () {
 	if (this.repositories == null)
 		throw new Error('InitError: cannot init before loadRepositories')
-	return dbLayer.init(this.config).then((res => {
+	return dbLayer.init(this.config).then(res => {
 		if (this.config.setTrigger == true) {
 			return this.setupDatabase().then(result => {
 				return this.repositories
 			})
 		} else {
-			console.log('Trigger not set')
+			this.log.info('Trigger not set')
 			return this.repositories
 		}
-	}).bind(this))
+	})
 }
 
 Orm.prototype.setupDatabase = function () {
@@ -113,8 +114,6 @@ Orm.prototype.setupDatabase = function () {
 	$$ language 'plpgsql';`
 
 	let startCreate = (result => {
-		console.log('finished drop')
-		console.log('started create')
 		let promisesCreate = this.repositories.reduce((result, repository) => {
 			let rawQueryAutoCreatedAt = 'CREATE TRIGGER {triggerName} BEFORE INSERT ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_created_column();'
 			let rawQueryAutoUpdatedAt = 'CREATE TRIGGER {triggerName} BEFORE UPDATE ON {tableName} FOR EACH ROW EXECUTE PROCEDURE update_modified_column();'
@@ -125,10 +124,9 @@ Orm.prototype.setupDatabase = function () {
 			return result
 		}, [])
 		return Promise.all(promisesCreate)
-	}).bind(this)
+	})
 
 	let startDrop = (result => {
-		console.log('started drop')
 		let promisesDrop = this.repositories.reduce((result, repository) => {
 			let rawQueryDropOldCreatedAt = 'DROP TRIGGER trigger_create_{modelName} ON {tableName};'
 			let rawQueryDropOldUpdatedAt = 'DROP TRIGGER trigger_update_{modelName} ON {tableName};'
@@ -138,13 +136,17 @@ Orm.prototype.setupDatabase = function () {
 				result.push(this.query(rawQueryDropOldUpdatedAt.replace('{triggerName}', 'trigger_create_' + _.toLower(repository.modelName)).replace('{tableName}', repository.tableName)))
 			return result
 		}, [])
-		return Promise.all(promisesDrop)
-	}).bind(this)
+		return Promise.all(promisesDrop).catch(err => {
+			//Ignore here
+			this.log.warn('Error in start Drop catched', err)
+			return Promise.resolve('continue')
+		})
+	})
 
-	return Promise.all([this.query(queryFunctionAutoCreated), this.query(queryFunctionAutoUpdated)]).then(startDrop).catch(err => {
-		//We don't care here
-		return Promise.resolve('continue')
-	}).then(startCreate)
+	return Promise.all([this.query(queryFunctionAutoCreated), this.query(queryFunctionAutoUpdated)]).catch(err => {
+		this.log.warn('Error with first requests to db')
+		return Promise.reject(err)
+	}).then(startDrop).then(startCreate)
 }
 
 Orm.prototype.query = function (query) {
