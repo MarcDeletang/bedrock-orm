@@ -1,15 +1,15 @@
 services:
-  - postgresql
+    - postgresql
 
 language: node_js
 
 env:
-- CONFIGPATH=config.travis.js
+    - CONFIGPATH=config.travis.js
 
 node_js:
-  - "6"
+    - "6"
 
 
 before_script:
-    psql -c 'test;' -U postgres
-    psql test < db.dump  -U postgres
+    - psql -c 'test;' -U postgres
+    - psql test < db.dump  -U postgres
