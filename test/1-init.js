@@ -1,13 +1,13 @@
 const expect = require('chai').expect
 
-const opt = require('./config.js')
+const configPath = process.env.CONFIGPATH
+const opt = configPath == null ? require('./config.js') : require('./' + configPath)
+
+
 const repositories = require('./models/Repositories.js')
 
 const Orm = require('../index.js')
 const _ = require('lodash')
-
-// const configFilePath = process.argv
-// console.log('PATH', configFilePath)
 
 describe('Init', function () {
 	describe('Constructor', function () {
@@ -118,7 +118,7 @@ describe('Init', function () {
 				}, err => {
 					console.log('err', err)
 				})
-				
+
 			}).not.to.throw(Error)
 			done()
 		})
