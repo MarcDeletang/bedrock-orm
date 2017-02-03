@@ -13,8 +13,17 @@ export class Transaction {
 
 export class Repository {
     constructor(name: string, model: any)
-    create(data: any): Model
-    findOne(): Model
+    create(data: any, transaction: Transaction): Model
+    findOne(criteria: any, optArgs: OptArg): Model
     find(): Model[]
     startTransaction(): Promise<Transaction>
+}
+
+export class OptArg {
+    populate?: string[]
+    sort?: {}
+    limit?: number
+    skip?: number
+    paginate?: { page: number, limit: number }
+    where?: [{ field: string, "<"?: string, "<="?: string, ">"?: string, ">="?: string, "!"?: string, like?: string, contains?: string, startsWith?: string, endsWith?: string }]
 }

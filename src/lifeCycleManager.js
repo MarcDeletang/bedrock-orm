@@ -1,4 +1,4 @@
-var _ = require('lodash')
+const _ = require('lodash')
 var beforeValidateCallbacks = []
 var afterValidateCallbacks = []
 var beforeCreateCallbacks = []

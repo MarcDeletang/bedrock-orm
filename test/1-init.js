@@ -7,7 +7,7 @@ const configPath = process.env.CONFIGPATH
 const opt = configPath == null ? require('./config.js') : require('./' + configPath)
 const repositories = require('./models/Repositories.js')
 
-const Orm = require('../index.js')
+const Orm = require('../index.js').Orm
 const _ = require('lodash')
 
 describe('Init', function () {
@@ -88,7 +88,6 @@ describe('Init', function () {
 			let loadRes = orm.loadRepositories()
 			expect(loadRes).to.be.an('array')
 			done()
-			console.log(loadRes[0])
 		})
 
 	})
@@ -108,31 +107,10 @@ describe('Init', function () {
 			optCloned.password = "fail"
 			let orm = new Orm(optCloned, repositories)
 			orm.loadRepositories()
-			 expect(orm.init()).to.be.rejectedWith(Error).notify(done)
+			expect(orm.init()).to.be.rejectedWith(Error).notify(done)
 		})
 
-		// it('Orm init should work without errors', function (done) {
-		// 	let orm = new Orm(opt, repositories)
-		// 	orm.loadRepositories()
-		// 	expect(() => {
-		// 		orm.init().then(() => {
-		// 			User.create({
-		// 				email: 'test@test.fr',
-		// 				password: 'password',
-		// 				firstName: 'firstName',
-		// 				lastName: 'lastName'
-		// 			}).then(user => {
-		// 				console.log('user', user)
-		// 			}, err => {
-		// 				console.log('err', err)
-		// 			})
-
-		// 		}).catch(err => {
-		// 			console.log('Main catched', err)
-		// 		})
-		// 	}).not.to.throw(Error)
-		// 	done()
-		// })
+	
 
 
 	})

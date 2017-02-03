@@ -1,7 +1,6 @@
 'use strict'
-
-var Repository = require('./repository.js')
-var lifeCycleManager = require('./lifeCycleManager.js').init()
+var Repository = require('../repository.js')
+var lifeCycleManager = require('../lifeCycleManager.js').init()
 var _ = require('lodash')
 
 module.exports = {
@@ -56,7 +55,7 @@ module.exports = {
 					log.warn('Cannot add method: ' + key + ' for repository: ' + repository.modelName + ' (Already binded)')
 					continue
 				}
-				repository[key] = _.bind(repository[key], repository.extend[key])
+				repository[key] = _.bind(repository.extend[key], repository)
 			}
 		}
 	}

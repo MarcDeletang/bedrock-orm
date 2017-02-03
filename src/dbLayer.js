@@ -1,6 +1,5 @@
-'use strict'
-
-var pg = require('pg')
+const Promise = require('bluebird')
+const pg = require('pg')
 
 module.exports = {
 	init(config) {

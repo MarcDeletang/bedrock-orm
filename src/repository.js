@@ -6,6 +6,7 @@ var lfManager = require('./lifeCycleManager.js')
 var argsParser = require('./argsParser.js')
 var ormEx = require('./exceptions.js')
 var TransactionObject = require('./transaction.js')
+var Promise = require('bluebird')
 
 function Repository(modelName, model) {
 	//Add the primary key
@@ -134,19 +135,19 @@ Repository.prototype.getAsColumns = function (hideCollection, columnAlias) {
 
 Repository.prototype._create = function (data, transactionObj) {
 	try {
-		return new Promise(((resolve, reject) => {
-			var onCallBeforeCreate = (res => { return res }).bind(this)
-			var onCallAfterValidate = (res => { lfManager.callBeforeCreate(this.modelName, data) }).bind(this)
-			var onCallBeforeValidate = (res => { return lfManager.callAfterValidate(this.modelName, data) }).bind(this)
+		return new Promise((resolve, reject) => {
+			var onCallBeforeCreate = res => { return res }
+			var onCallAfterValidate = res => { lfManager.callBeforeCreate(this.modelName, data) }
+			var onCallBeforeValidate = res => { return lfManager.callAfterValidate(this.modelName, data) }
 
-			lfManager.callBeforeCreate(this.model, data).then(onCallBeforeValidate).then(onCallAfterValidate).then(onCallBeforeCreate).then((res => {
+			lfManager.callBeforeCreate(this.model, data).then(onCallBeforeValidate).then(onCallAfterValidate).then(onCallBeforeCreate).then(res => {
 				var query = queryBuilder.insert(this.tableName)
 				//Compare prop with model, handle special cases (ex: oneToMany)
 
 				query = queryBuilder.addSet(this, data, query, true)
 				var queryString = query.toString() + ' RETURNING id'
 
-				var onCreate = (result => {
+				var onCreate = result => {
 					if (result.rowCount == 1) {
 						//Cleanup undefined
 						data = this.feedFromDB(result.rows[0], data)
@@ -156,7 +157,7 @@ Repository.prototype._create = function (data, transactionObj) {
 					}
 					console.log('WEIRD CREATE', data)
 					return resolve(data)
-				}).bind(this)
+				}
 
 				if (transactionObj != null)
 					transactionObj.query(queryString).then(onCreate)
@@ -164,9 +165,9 @@ Repository.prototype._create = function (data, transactionObj) {
 					db.query(queryString).then(onCreate)
 
 
-			}).bind(this))
+			})
 
-		}).bind(this))
+		})
 	} catch (e) {
 		if (e && e.code) {
 			//This cannot stay here
@@ -191,7 +192,7 @@ Repository.prototype.createArray = function (datas, transactionObj) {
 			var onCallAfterValidate = (res => { lfManager.callBeforeCreate(this.modelName, data) }).bind(this)
 			var onCallBeforeValidate = (res => { return lfManager.callAfterValidate(this.modelName, data) }).bind(this)
 
-			lfManager.callBeforeCreate(this.model, datas).then(onCallBeforeValidate).then(onCallAfterValidate).then(onCallBeforeCreate).then((res => {
+			//lfManager.callBeforeCreate(this.model, datas).then(onCallBeforeValidate).then(onCallAfterValidate).then(onCallBeforeCreate).then((() => {
 
 				var query = queryBuilder.insert(this.tableName)
 				//Compare prop with model, handle special cases (ex: oneToMany)
@@ -218,7 +219,7 @@ Repository.prototype.createArray = function (datas, transactionObj) {
 			}).bind(this)).catch(error => {
 				reject(error)
 			})
-		}).bind(this))
+		//}).bind(this))
 	} catch (e) {
 		//Bedrock.log.error('Repository.create', e.stack)
 		throw e
