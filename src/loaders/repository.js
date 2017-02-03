@@ -1,7 +1,8 @@
 'use strict'
 var Repository = require('../repository.js')
+require('../queries/create.js')
 var lifeCycleManager = require('../lifeCycleManager.js').init()
-var _ = require('lodash')
+const _ = require('lodash')
 
 module.exports = {
 

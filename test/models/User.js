@@ -33,9 +33,9 @@ module.exports = {
 			size: 128,
 		},
 
-		carts: {
-			collection: 'cart',
-			via: 'user'
+		cart: {
+			model: 'cart',
+			columnName: 'cart_id'
 		},
 
 		toJSON: () => {

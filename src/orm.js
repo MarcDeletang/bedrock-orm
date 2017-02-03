@@ -2,7 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const dbLayer = require('./dbLayer.js')
-const repositoryLoader = require('./repositoryLoader/index.js')
+const repositoryLoader = require('./loaders/repository.js')
 
 function setConfig(config, log) {
 	if (config == null)

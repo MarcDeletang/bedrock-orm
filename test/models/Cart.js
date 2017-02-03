@@ -10,11 +10,6 @@ module.exports = {
 			type: 'string'
 		},
 
-		user: {
-			model: 'user',
-			columnName: 'user_id'
-		},
-
 		isPaid: {
 			type: 'boolean',
 			defaultsTo: false

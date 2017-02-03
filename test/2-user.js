@@ -10,7 +10,7 @@ const repositories = require('./models/Repositories.js')
 const Orm = require('../index.js').Orm
 const _ = require('lodash')
 
-const userProperties = ['id', 'email', 'password', 'salt', 'firstName', 'lastName', 'createdAt', 'updatedAt', 'carts', 'toJSON']
+const userProperties = ['id', 'email', 'password', 'salt', 'firstName', 'lastName', 'createdAt', 'updatedAt', 'cart', 'toJSON']
 
 describe('User', function () {
 
@@ -20,19 +20,15 @@ describe('User', function () {
             let orm = new Orm(opt, repositories)
             orm.loadRepositories()
             expect(() => {
-                orm.init().then(() => {
-                    User.create({
+                return orm.init().then(() => {
+                    return User.create({
                         email: 'test@test.fr',
                         password: 'password',
                         firstName: 'firstName',
                         lastName: 'lastName'
                     }).then(user => {
                         done()
-                    }, err => {
-                        console.log('err', err)
                     })
-                }).catch(err => {
-                    console.log('Main catched', err)
                 })
             }).not.to.throw(Error)
         })
@@ -84,7 +80,7 @@ describe('User', function () {
             expect(() => {
                 return orm.init().then(() => {
                     return User.find().then(users => {
-                        users.map(user=>{
+                        users.map(user => {
                             expect(user).to.contain.all.keys(userProperties)
                         })
                         done()
@@ -106,7 +102,7 @@ describe('User', function () {
                             return result
                         }, [])
                         return Promise.all(promises).then(results => {
-                            results.map(countRemoved =>{
+                            results.map(countRemoved => {
                                 expect(countRemoved).to.equal(1)
                             })
                             done()

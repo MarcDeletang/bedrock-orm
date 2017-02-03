@@ -65,8 +65,7 @@ CREATE TABLE cart (
     "isPaid" boolean,
     id integer NOT NULL,
     "createdAt" timestamp with time zone,
-    "updatedAt" timestamp with time zone,
-    user_id integer
+    "updatedAt" timestamp with time zone
 );
 
 
@@ -99,7 +98,7 @@ ALTER SEQUENCE cart_id_seq OWNED BY cart.id;
 
 CREATE TABLE cartproduct (
     "dateAdded" timestamp with time zone,
-    "numberOf" integer,
+    "numberOf" integer NOT NULL,
     id integer NOT NULL,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
@@ -178,6 +177,7 @@ CREATE TABLE "user" (
     "firstName" text,
     "lastName" text,
     id integer NOT NULL,
+    cart_id integer,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone
 );
