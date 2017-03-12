@@ -67,7 +67,7 @@ module.exports = {
 			if (_.has(repository.model, field)) {
 				var columnName = repository.getColumnName(field, true)
 				var value = model[field]
-				if (value === null)
+				if (value === undefined)
 					continue
 				if (columnName != false) {
 					if (value == undefined)
@@ -96,7 +96,7 @@ module.exports = {
 				if (_.has(repository.model, field)) {
 					var columnName = repository.getColumnName(field, true)
 					var value = model[field]
-					if (value === null)
+					if (value === undefined)
 						continue
 					if (columnName != false) {
 						if (value == undefined)
